@@ -76,12 +76,8 @@ runBot conf bot start = do
     putStrLn "Unable to connect"
     ioError . userError . T.unpack $ r ^. responseBody . key "error" . _String)
   let Just url = r ^? responseBody . key "url" . _String
-  (mSessionInfo :: Maybe SlackSession) <-
-    case eitherDecode fixRetentionType (r ^. responseBody) of
-      Left e -> print (r ^. responseBody) >> (print e) >> (return Nothing)
-      Right res -> return $ Just res
   let partialState :: Metainfo -> SlackState s
-      partialState metainfo = SlackState metainfo mSessionInfo start conf
+      partialState metainfo = SlackState metainfo Nothing start conf
   putStrLn "rtm.start call successful"
   case parseWebSocketUrl (T.unpack url) of
     Just (host, path) ->
